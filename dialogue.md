@@ -193,4 +193,251 @@ So, with all that I have learned from this first attempt at a chess engine, it i
 
 Gung ho coding like this is typically very bad practice (apparently) however I have no experience with making games and wasn't really sure what to look out for. Since this is mostly just for fun, I felt like instead of looking at how other chess engines are made I'd rather just gung ho it and find my own way.
 
-Since I did it this way and plan on continuing this bushwacking method I expect this is not the last time I start over. But not giving up is skill #1 when it comes to software development! (I can salvage the pieces)
+Since I did it this way and plan on continuing this bushwacking method I expect this is not the last time I start over. But not giving up is skill #1 when it comes to software development! (I can salvage the pieces) Whoops
+
+
+So theres a metric ton of things to check for in each turn. chess.py is a single file, not enough to hold them all. I think it would be rational to break each function into its own file. But first I have to break each step into a function.
+
+so if the main chess function returns the new state of the game, what if someone attempts to send an invalid move? Realistically with two good faith players this wont happen since you'd have to send a custom server request but never underestimate the willpower of trolls.
+
+If a player sends an invalid move, lets add a new thing to be returned. the main chess function returns:
+
+```python
+{
+    # Whether or not the move was valid
+    valid: bool,
+
+    # Collection of pieces for each team
+    # This will have to include
+    #   coordinates
+    #   enPassant (whether or not piece can en passant for pawns)
+    #   type (pawn, rook, etc.)
+
+    newState: {
+        "white": [{
+            type: str,
+            enPassant: bool,
+            moveCount: int
+        }], 
+        "black": [{
+            type: str,
+            enPassant: bool,
+            moveCount: int
+        }]
+    }
+}
+```
+
+Then, if the move is valid, it is emmitted with the same data. So the front end engine will interface with the back end engine through this data.
+
+#### chess.py (validate move function) requirements:
+-   Is this a valid move?
+    1.   Can the piece move this way?
+        1.  Is it within the limitations of the piece itself?
+            1.  If it is a legal move, I need a list of coordinates denoting the path the unit takes, with the last element in the list being where the piece would move to. This will help answer the other questions without running another heavy search. Python is slow enough with optimized algorithms :-)
+        2.  Does this move overlap or (if not a knight) cross over friendly units?
+            1.  Cross reference the coordinates of every friendly unit with all the coordinates returned from is it a legal move (if not a knight)
+            2.  If a knight, take the single element from the list returned from is it a legal move and compare it to the coordinates of friendly units
+        3.  Does this move cross over enemy units?
+            1.  If not a knight cross reference the coordinates of every enemy unit with all the coordinates returned from is it a legal move, except for the last one.
+    2.   If it can and the moving side was not in check, does this move put it in check?
+    3.   If it can and the moving side was in check, does this move take them out of check?
+        1.  These can be minimized to will I be in check at the end of this turn? I can analyze the legal moves of all the enemy pieces in order to determine this.
+    4.   If this move is valid so far, does the move capture a piece?
+        1.  Is this an en passant?
+    5.   Is this move a castle?
+    6.   Is this move checkmate? Does this move put the enemy in check, and leave them with no legal moves?
+-   If it is a valid move, return valid: True and the new state
+-   Else, return it is an invalid move and the old state as the new state
+
+
+I have to go for now but I'll be back on soon. There are a lot of specific edge cases I have to mull over :-)
+
+The pieces will have to be classes, because there a common functions I need for all of them that act differently according to the type. However, I just need to add a get() function to them that returns only the information to communicate between server and client
+
+The piece abstract class
+```python
+class Piece(ABC):
+
+    def __init__(self, moveCount, enPassant, coords):
+        self.coords = coords
+        self.moveCount = moveCount
+        self.enPassant = enPassant
+        return
+
+
+    @abstractmethod
+    def get_paths(self):
+        """ Returns all possible paths as a list of lists """
+        
+        paths = []
+        return paths
+
+
+    def get(self):
+        """ Returns information about piece to travel across network """
+
+        return {
+            "type": self.type,
+            "coords": self.coords
+        }
+
+
+    def move_piece(self, coords):
+        """ Moves piece to coords """
+
+        # Override with pawn for handling en passant
+        self.moveCount += 1
+        pass
+```
+
+When chess.py populates the board, it just takes the information about the pieces and uses their type to initialize the class then when chess.py returns it returns the pieces as a result of piece.get(), which is the same format that the front end will send piece information in.
+
+For step 1.1, chess.py runs piece.get_paths() and checks if the coordinates are within one of the paths
+
+For step 1.2, chess.py runs self.check_friendly_collision(self, piece) to check if any of the pieces paths connect with a friendly unit. This is a function of the game to trim the piece's path, not a function of the piece itself.
+
+The way the game will handle moving the piece
+```python
+class Chess:
+
+    def __init__(self, friendlyTeam, enemyTeam):
+        self.friendlyTeam = [] # list of friendly pieces (including king)
+        self.enemyTeam = [] # list of enemy pieces (including king)
+        for coords in friendlyTeam:
+            initialize_piece_and_append_to_friendlyTeam # pseudo
+        
+        for coords in enemyTeam:
+            initialize_piece_and_append_to_enemyTeam # pseudo
+
+
+    def get_friendly_king(self):
+        return index_of_friendly_king # pseudo
+
+
+    def get_enemy_king(self):
+        return index_of_enemy_king # pseudo
+
+
+    def check_move(coords, moveCoords):
+        piece = get_piece_from_coords   #psuedo
+        paths = piece.get_paths()
+        possiblePath = None
+        
+        # step 1.1
+        for path in paths:
+            for tmpCoords in path:
+
+                # If moveCoords found in valid path
+                if tmpCoords == moveCoords:
+                    possiblePath = path
+                    trim_rest_of_coords_past_this_index_out_of_moveToPath # pseudo
+
+        # if moveCoords not in possible paths:
+        if (not possiblePath):
+            return False
+
+        # step 1.2
+        for tmpCoords in possiblePath:
+            for piece in friendlyTeam:
+                if piece.coords == tmpCoords:
+                    if ()
+                    trim_rest_of_coords_out_of_path_including_this_index # pseudo
+                    break
+
+            # step 1.3
+            if not last index: # pseudo
+                for piece in enemyTeam:
+                    if piece.coords == tmpCoords:
+                        trim_rest_of_coords_out_of_path_after_this_index # pseudo
+                        break
+
+        if (moveCoords not in possiblePath): # if trying to move past other piece
+            return False
+```
+
+Thinking.... 🤔
+
+Time to take a break!
+
+
+Card games like yugioh have multiple steps to each turn. Maybe I need to take a similar approach in dealing with each chess
+
+Chess turn steps:
+-   premove_step: step 1
+-   move_step: steps 2 and 3
+-   postmove_step: steps 4 5 and 6
+
+-   Two states for the turn:
+    -   initialState
+    -   turnState
+
+
+# 6/2/21
+I started implementing the new approach off stream, but now that the skeleton is there and I'm testing, it's time for the bug hunt to commence. I am testing out the features by altering the function in the /start endpoint, which I am fetching on the React homepage.
+
+Right now I am trying to get the chess board to print an ascii state of the board when I request the /start endpoint
+
+Subclasses have been giving lots of strange errors. It says missing white positional argument but it is explicitly there so I'm not sure what that's about.
+
+The pawns seem to be working and are initialized exactly the same as rooks. Both are subclasses of the same piece ABC, so this is very confusing. Not quite sure where to look right now.
+
+Stupid syntax error lol. So now I have the board successfully starting up a new game state. This indicates that all the base functions of the Piece superclass are working properly.
+
+The only thing is I am designing this to move top down, not left to right. The fact that it prints like this is probably going to lead to some confusion down the road. However if I keep in mind that the logic of [row, col] is consistent throughout the project it should not prove to be an issue.
+
+I think now it's time to get this basic data moving between the server and the client.
+
+
+
+So right now, I have established a standard for client to server communication. I will send each teams pieces and their data between the client and server. Both the client and the server will have their own chess board engine and deal with the logic of the pieces on themselves.
+
+This means more typing for me, but less network traffic. One of the things you learn as you grow as a developer is that you need to figure out what to optimize for, and build around that.
+
+A decent developer can build a live streaming app that takes up like 4gb of ram per stream and an additional 2gb per viewer, but a great developer drops those numbers down to megabytes. In the real world, that is the difference between making $100,000 a month and losing $100,000 a month because resources cost money.
+
+Since everyone has a grade A smartphone in hand, I am optimizing for as little network traffic as possible and only just enough logic on the server to prevent cheating, but everything else is being computed on the end device. So it may sound dumb to create two separate chess engines, but I am optimizing for something specific
+
+Also pretend I am writing tests. You should I am just testing the dummy way because this is just a for fun project.
+
+So when I refresh the page and get all this data in the console
+
+that is because in the page, I am requesting the /start endpoint, which creates the board and returns the data
+
+
+### Rumley
+
+So JavaScript is an interpreted JIT compiled language. This means the computer is basically like 'ok you have a javascript file? send it over and I will start executing immediately. If this code is broken, I will just blow up and all your clients money will die and you bad developer. I don't compile the code before I run it, I just wing it so you better have crossed your ts and shit.'
+
+This is not bad for small things, but when you are working on enterprise grade software this can be extremely dangerous. (i will answer your question it just requires context)
+
+So javascript is weakly typed. This means the following is perfectly legal in javascript
+
+```javascript
+
+let x = 1
+
+console.log(x + 'a')
+```
+
+here x is an int (number) and a is a string. In a compiled language, making a mistake like this would throw an error. In Javascript, this would not recognize an error and just log '1a'
+
+So imagine you have a huge database of users, and you change the structure of the User accounts in the backend. You would have to go in the front end, look for as many errors this would throw as you can, throw it in production and pray to god you didnt miss anything. This costs dozens of hours to the developers and usually they don't find all the issues anyway.
+
+These runtime errors, things that the computer doesn't detect until you have dozens of belligerent karens emailing you, are borderline deal breaking when you are choosing a language for enterprise software.
+
+What if JavaScript could detect all these things? Like straight up let you know every instance where something could go wrong, and wont even compile unless you fixed every one?
+
+Enter typescript. TypeScript is a super set of javascript, that allows for strong typing and a really powerful compiler that points out where all your errors are.
+
+So take that database issue from the javascript example. If it was a typescript project, you would just change the user 'interface', or the format for the user structure. Then, typescript would tell you every single instance of the old user structure that you have to change throughout your whole codebase. You save hours upon hours of time and barely anything can go wrong, at least compared to the shithole of type errors you encounter with enterprise level javascript codebases.
+
+I will be back in a minute, let me know if you have any other questions and I'll try to answer
+
+ok, so now I am going to try to simulate a move in the front end, and see how the back end reacts. as of right now, I don't think the back end will do anything since I didn't reimplement the logic yet. The following might be a bit confusing, since I will have to use promise chaining. 
+
+So when you are dealing with data over the network, it doesn't come back to you instantly. But the functions all run near instantly. So how do you wait to get the data back?
+
+Two options: asynchronous functions and promise chaining. The most modern implementations of javascript allow for just asynchronous (async/await) functions, but I am not compiling to the most modern version of javascript since not every browser has it working yet.
+
+I am going with the second option, promise chaining. example:
