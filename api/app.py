@@ -1,25 +1,31 @@
-from flask import Flask, jsonify
-from flask.wrappers import Response
+from flask import Flask, jsonify, request, session
 
-from .chess.pieces.bishop import Bishop
-from .chess.board.board import Board
+from .chess.Chess import Chess
 
+
+# Flask config
 app = Flask(__name__)
+app.secret_key = '3psdughpds98gy'
 
 
-x = Board()
-print(x.get())
+@app.route('/chess/start')
+def get_start():
+    x = Chess()
+    x.print_ascii()
+
+    print('Moving white pawn')
+    x.make_move(moveFrom=[6, 2], moveTo=[4, 2])
+    x.print_ascii()
+    session['game'] = x.to_json()
+    return session['game']
 
 
-@app.route('/pawn')
-def get_pawn():
-    x = Bishop()
-    print('Here are bishop valid moves', x.validMoves)
-    return {'moves': x.validMoves}
+@app.route('/chess/move', methods=['POST'])
+def post_move():
+    print(request)
+    if not 'game' in session:
+        return {}
 
-
-@app.route('/start-game')
-def post_start_game():
-    board = Board()
-    data = board.get()
-    return {'board': data}
+    session['game'].move(request.state)
+    print(session['game'].get())
+    return {session['game'].get()}
