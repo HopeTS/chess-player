@@ -25,6 +25,7 @@ yarn-error.log*
 # python 
 api/venv/
 __pycache__
+api/*.log
 
 # mongodb
 api/data/db/diagnostic.data/
