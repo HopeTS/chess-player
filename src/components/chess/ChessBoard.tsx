@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./ChessBoard.scss";
 import ChessSquare from "./ChessSquare";
 import { IClientChessMove, IClientChessState, coord } from "../../types";
-import { start_game } from "../../api/chess";
+import * as api from "../../api/chess";
 
 /** Chess board */
 function ChessBoard() {
@@ -36,7 +36,7 @@ function ChessBoard() {
 		],
 	});
 
-    // Valid paths for selected piece (fromCoords)
+	// Valid paths for selected piece (fromCoords)
 	let [validPaths, setValidPaths] = useState<[coord?]>([]);
 
 	// Move coordinates ([from, to])
@@ -73,9 +73,15 @@ function ChessBoard() {
 		handle_start_game();
 	}, []);
 
+    // Move handler
+    useEffect(() => {
+        fromCoords && get_valid_paths();
+        (fromCoords && toCoords) && make_move();
+    }, [fromCoords, toCoords]);
+
 	/** Start game  */
 	const handle_start_game = () => {
-		start_game()
+		api.start_game()
 			.then((startState) => {
 				startState && setChessState(startState);
 			})
@@ -87,6 +93,18 @@ function ChessBoard() {
 	/** Make move */
 	const make_move = () => {
 		// TODO: Make endpoint calls
+		console.log("moveCoords", fromCoords, toCoords);
+		if (!fromCoords || !toCoords) return false;
+		api.make_move([fromCoords, toCoords])
+			.then((newState) => {
+                console.log(newState)
+				newState && setChessState(newState);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+
+		cancel_move();
 		return;
 	};
 
@@ -101,18 +119,17 @@ function ChessBoard() {
 		console.log("Piece selected", coords);
 		// TODO: Figure out why piece selected (piece to move, or square to move it to?)
 		if (!fromCoords) {
+			console.log("step 1");
 			setFromCoords(coords);
-			get_valid_paths();
 		} else {
+			console.log("step 2");
 			setToCoords(coords);
-			make_move();
 		}
 		return;
 	};
 
 	/** Cancel move */
 	const cancel_move = () => {
-		console.log("Move cancelled");
 		setFromCoords(null);
 		setToCoords(null);
 	};
