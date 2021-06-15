@@ -1,5 +1,6 @@
 from flask import Flask, request, session
 import logging
+import json
 
 from .chess.Chess import Chess
 
@@ -33,7 +34,12 @@ def post_move():
     if not 'game' in session:
         return {}
 
-    print(request.move)
-
-    session['game'].move(request.state)
-    return {session['game'].get()}
+    move = json.loads(request.data)['move']
+    x = Chess()
+    x.from_json(session['game'])
+    moveSuccess = x.make_move(move)
+    x.log_state()
+    if moveSuccess:
+        print('move success')
+        session['game'] = x.to_json()
+    return session['game']

@@ -1,7 +1,7 @@
 // Handle all endpoints related to chess games
-import { IServerChessState, IClientChessState } from "../types";
+import { IServerChessState, IClientChessState, move } from "../types";
 
-/** Get chess/start endpoint and convert to client data */
+/** GET chess/start endpoint and convert to client data */
 export function start_game(): Promise<IClientChessState | false> {
 	return fetch("http://localhost:3000/chess/start")
 		.then((res) => res.json())
@@ -15,7 +15,26 @@ export function start_game(): Promise<IClientChessState | false> {
 			return clientData;
 		})
 		.catch((err) => {
-			console.log(err);
+			console.error(err);
+			return false;
+		});
+}
+
+/** POST chess/move endpoint and convert to client data */
+export function make_move(move: move): Promise<IClientChessState | false> {
+	return fetch("http://localhost:3000/chess/move", {
+        method: 'POST',
+        body: JSON.stringify({move: move}),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+		.then((res) => res.json())
+		.then((data: IServerChessState): IClientChessState => {
+            return data;
+        })
+		.catch((err) => {
+			console.error(err);
 			return false;
 		});
 }
