@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, request, session
+import logging
 
 from .chess.Chess import Chess
 
@@ -7,25 +8,32 @@ from .chess.Chess import Chess
 app = Flask(__name__)
 app.secret_key = '3psdughpds98gy'
 
+# Log config
+log = logging.getLogger('chess')
+log.setLevel(logging.DEBUG)
+handler = logging.FileHandler('app.log', 'w', 'utf-8')
+formatter = logging.Formatter('%(name)s %(message)s')
+handler.setFormatter(formatter)
+log.addHandler(handler)
+
 
 @app.route('/chess/start')
 def get_start():
+    log.debug('/chess/start endpoint called')
     x = Chess()
-    x.print_ascii()
+    x.start_new_game()
 
-    print('Moving white pawn')
-    x.make_move(moveFrom=[6, 2], moveTo=[4, 2])
-    x.print_ascii()
     session['game'] = x.to_json()
     return session['game']
 
 
 @app.route('/chess/move', methods=['POST'])
 def post_move():
-    print(request)
+    log.debug('/chess/move endpoint called')
     if not 'game' in session:
         return {}
 
+    print(request.move)
+
     session['game'].move(request.state)
-    print(session['game'].get())
     return {session['game'].get()}

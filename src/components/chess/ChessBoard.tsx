@@ -30,11 +30,14 @@ function ChessBoard() {
 			[0, 0, 0, 0, 0, 0, 0, 0],
 		],
 		history: [],
-		castle: [],
+		castle: [
+			[true, true, true],
+			[true, true, true],
+		],
 	});
 
-	// Whether or not player is currently moving a piece
-	let [movingPiece, setMovingPiece] = useState<boolean>(false);
+    // Valid paths for selected piece (fromCoords)
+	let [validPaths, setValidPaths] = useState<[coord?]>([]);
 
 	// Move coordinates ([from, to])
 	let [fromCoords, setFromCoords] = useState<IClientChessMove["from"] | null>(null);
@@ -47,7 +50,15 @@ function ChessBoard() {
 			// Rank
 			for (let j = 0; j < 8; j++) {
 				// File
-				tmpSquares.push(<ChessSquare coords={[i, j]} chessState={chessState} key={`ij`} />);
+				tmpSquares.push(
+					<ChessSquare
+						coords={[i, j]}
+						chessState={chessState}
+						key={`${i}${j}`}
+						select_piece={() => select_piece([i, j])}
+						cancel_move={() => cancel_move()}
+					/>
+				);
 			}
 		}
 		return tmpSquares;
@@ -62,9 +73,6 @@ function ChessBoard() {
 		handle_start_game();
 	}, []);
 
-	// Handle move state
-	useEffect(() => {}, [movingPiece, fromCoords, toCoords]);
-
 	/** Start game  */
 	const handle_start_game = () => {
 		start_game()
@@ -72,33 +80,48 @@ function ChessBoard() {
 				startState && setChessState(startState);
 			})
 			.catch((e) => {
-				console.log(e);
+				console.error(e);
 			});
 	};
 
-	/** Pick up a piece (Get 'from' coords for move) */
-	const pick_up_piece = (coords: coord) => {
-		//TODO
-	};
-
-	/** Place piece (Get 'to' coords for move) */
-	const place_piece = (coords: coord) => {
-		//TODO
-	};
-
 	/** Make move */
-	const make_move = (move: IClientChessMove) => {
+	const make_move = () => {
 		// TODO: Make endpoint calls
+		return;
+	};
+
+	/** Calculate valid paths of fromCoords */
+	const get_valid_paths = () => {
+		//TODO
+		return;
+	};
+
+	/** Handle piece selection (piece onClick) */
+	const select_piece = (coords: coord) => {
+		console.log("Piece selected", coords);
+		// TODO: Figure out why piece selected (piece to move, or square to move it to?)
+		if (!fromCoords) {
+			setFromCoords(coords);
+			get_valid_paths();
+		} else {
+			setToCoords(coords);
+			make_move();
+		}
+		return;
 	};
 
 	/** Cancel move */
 	const cancel_move = () => {
-		setMovingPiece(false);
+		console.log("Move cancelled");
 		setFromCoords(null);
 		setToCoords(null);
 	};
 
-	return <div className="ChessBoard">{squares.map((square) => square)}</div>;
+	return (
+		<div className="ChessBoard" onMouseLeave={cancel_move}>
+			{squares.map((square) => square)}
+		</div>
+	);
 }
 
 export default ChessBoard;

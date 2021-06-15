@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import "./ChessSquare.scss";
 import { IChessSquare, IChessPiece, team, piece } from "../../types";
@@ -11,6 +11,8 @@ function ChessSquare(props: IChessSquare) {
 	// Chess piece data
 	let [piece, setPiece] = useState<IChessPiece["piece"]>(0);
 	let [team, setTeam] = useState<IChessPiece["team"]>(0);
+
+    // Chess piece
 
 	useEffect(() => {
 		/** Get piece data for square */
@@ -34,7 +36,11 @@ function ChessSquare(props: IChessSquare) {
 
 	return (
 		<div className="ChessSquare" data-color={color}>
-			<ChessPiece piece={piece} team={team} />
+			<ChessPiece 
+                piece={piece} team={team}
+                select_piece={props.select_piece}
+                cancel_move={props.cancel_move}
+            />
 		</div>
 	);
 }

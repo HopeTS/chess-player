@@ -1,0 +1,9 @@
+.ChessBoard {
+    display: grid;
+    grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+    grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+    width: 400px;
+    height: 400px;
+    margin: 3em auto;
+}
+

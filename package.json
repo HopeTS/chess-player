@@ -15,6 +15,7 @@
     "@types/react-router-dom": "^5.1.7",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-icons": "^4.2.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
@@ -23,9 +24,10 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "api-start-windows": "cd api && venv\\Scripts\\flask run --no-debugger",
-    "api-start-bash": "cd api && venv/bin/flask run --no-debugger",
+    "start:react": "react-scripts start",
+    "start:flask-windows": "cd api && venv\\Scripts\\flask run --no-debugger",
+    "start:flask-bash": "cd api && venv/bin/flask run --no-debugger",
+    "test:flask-windows": "cd api && venv\\Scripts\\activate && python -m unittest tests/chess/Chess.py",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -48,5 +50,9 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "@types/node-sass": "^4.11.1",
+    "node-sass": "5"
+  }
 }

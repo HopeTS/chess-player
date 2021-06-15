@@ -28,16 +28,12 @@ class Chess:
     """
 
 
-    def __init__(self, white = None, black = None, history = []):
+    def __init__(self):
         """ Initialize board """
         log.debug('Initializing Chess')
-
-        if not (white and black):
-            self.start_new_game()
         return
 
 
-    # User controls (Functions user calls directly to play game)
     def start_new_game(self):
         """ Set up new chess game state """
         log.debug('Starting new game')
@@ -124,10 +120,8 @@ class Chess:
 
         self.history.append([moveFrom, moveTo])
         return
-    # End User controls
 
 
-    # Game state getters
     def get_king_check(self, team):
         """
         Check king check status based on current condition of the board
@@ -1066,6 +1060,34 @@ class Chess:
             if not hasPiece == 1:
                 paths.append([coords])
 
+        # South
+        coords = [piece['coords'][0] + 1, piece['coords'][1]]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
+        # East
+        coords = [piece['coords'][0], piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
+        # West
+        coords = [piece['coords'][0], piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
+        # NE
+
+
+        # NW
+        # SE
+        # SW
+
         log.info('King paths for piece generated.')
         log.info('Piece:')
         log.info(piece)
@@ -1079,6 +1101,8 @@ class Chess:
         log.debug('Getting king paths')
 
         paths = []
+
+        
 
         log.info('King paths for piece generated.')
         log.info('Piece:')
@@ -1133,34 +1157,6 @@ class Chess:
             return False
         else:
             return True
-    # End Game state getters
-
-
-    # Data getters / state logger / print
-    def print_ascii(self):
-        """
-        Prints out an ascii version of the board
-        """
-
-        # Combine white and black pieces
-        board = [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-
-        for i in range(8):
-            for j in range(8):
-                board[i][j] = self.white[i][j] + self.black[i][j]
-
-        for rank in board:
-            print(rank)
-        return
 
 
     def log_state(self):
@@ -1193,4 +1189,10 @@ class Chess:
             "history": self.history,
             "castle": self.castle
         }
-    # End data getters / print
+
+    
+    def from_json(self, json):
+        """ Convert JSON data to chess game state """
+        log.debug('Converting Chess from JSON')
+        
+        return
