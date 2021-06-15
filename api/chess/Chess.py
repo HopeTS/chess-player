@@ -69,7 +69,7 @@ class Chess:
         return
 
     
-    def make_move(self, moveFrom, moveTo) -> bool:
+    def make_move(self, move: "list[list[int, int], list[int, int]]") -> bool:
         """
         Make move
 
@@ -78,10 +78,10 @@ class Chess:
 
         :return bool: whether or not move was successful
         """
-        log.debug('Making move from %s to %s' % (moveFrom, moveTo))
+        log.debug('Making move from %s to %s' % (move[0], move[1]))
 
         # Get piece
-        piece = self.get_piece(moveFrom)
+        piece = self.get_piece(move[0])
         if not piece:
             return False
 
@@ -90,36 +90,42 @@ class Chess:
             return False
         
         # Check if it is within their legal moves
-        self.get_moves(piece)
+        isLegal = False
+        legalMovePaths = self.get_moves(piece)
+        for legalMovePath in legalMovePaths:
+            for legalMove in legalMovePath:
+                if move[1] == legalMove:
+                    isLegal = True
+        if not isLegal:
+            return False
 
         # Make move and handle capture
         #TODO: Handle pawn reaching opposing end of the board?
-        #TODO: Handle en passant
         if piece['team'] == 0:
-            self.white[moveFrom[0]][moveFrom[1]] = 0
-            self.white[moveTo[0]][moveTo[1]] = piece['piece']
-            self.black[moveTo[0]][moveTo[1]] = 0
+            self.white[move[0][0]][move[0][1]] = 0
+            self.white[move[1][0]][move[1][1]] = piece['piece']
+            self.black[move[1][0]][move[1][1]] = 0
 
             # Handle en passant
-            if (piece['piece'] == 1) and (moveFrom[0] == 3) and (not moveFrom[1] == moveTo[1]):
-                self.black[moveFrom[0]][moveTo[1]] = 0
+            if (piece['piece'] == 1) and (move[0][0] == 3) and (not move[0][1] == move[1][1]):
+                self.black[move[0][0]][move[1][1]] = 0
 
         else:
-            self.black[moveFrom[0]][moveFrom[1]] = 0
-            self.black[moveTo[0]][moveTo[1]] = piece['piece']
-            self.white[moveTo[0]][moveTo[1]] = 0
+            self.black[move[0][0]][move[0][1]] = 0
+            self.black[move[1][0]][move[1][1]] = piece['piece']
+            self.white[move[1][0]][move[1][1]] = 0
 
             # Handle en passant
-            if (piece['piece'] == 1) and (moveFrom[0] == 4) and (not moveFrom[1] == moveTo[1]):
-                self.white[moveFrom[0]][moveTo[1]] = 0
+            if (piece['piece'] == 1) and (move[0][0] == 4) and (not move[0][1] == move[1][1]):
+                self.white[move[0][0]][move[1][1]] = 0
 
 
         # Check king check
         if self.get_king_check(piece['team']):
             return False
 
-        self.history.append([moveFrom, moveTo])
-        return
+        self.history.append([move[0], move[1]])
+        return True
 
 
     def get_king_check(self, team):
@@ -202,7 +208,7 @@ class Chess:
 
 
     def get_white_pawn_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
-        """ Get all possible white pawn move paths """
+        """ Get all legal white pawn move paths """
         log.debug('Getting white pawn paths')
 
         paths = []
@@ -212,7 +218,7 @@ class Chess:
             path = []
             for i in range(2):
                 coords = [piece['coords'][0] - (i + 1), piece['coords'][1]]
-                if not self.has_piece(coords):
+                if self.has_piece(coords) == 0:
                     path.append(coords)
                 else:
                     break
@@ -221,55 +227,59 @@ class Chess:
         # Normal move
         elif piece['coords'][0] > 0:
             coords = [piece['coords'][0] - 1, piece['coords'][1]]
-            if not self.has_piece(coords):
-                paths.append(coords)
+            if self.has_piece(coords) == 0:
+                paths.append([coords])
 
         # Capture left
         captureLeft = [piece['coords'][0] - 1, piece['coords'][1] - 1]
         if self.is_on_board(captureLeft):
-            if not self.has_piece(captureLeft):
-                paths.append(captureLeft)
+            if self.has_piece(captureLeft) == 2:
+                paths.append([captureLeft])
 
         # Capture right
         captureRight = [piece['coords'][0] - 1, piece['coords'][1] + 1]
         if self.is_on_board(captureRight):
-            if not self.has_piece(captureRight):
-                paths.append(captureRight)
+            if self.has_piece(captureRight) == 2:
+                paths.append([captureRight])
 
         # En passant
         if piece['coords'][0] == 3:
 
             # En passant left
             enPassant = [piece['coords'][0], piece['coords'][1] - 1]
-            if self.is_on_board(enPassant):
+            enPassantMove = [piece['coords'][0] - 1, piece['coords'][1] - 1]
+            if self.is_on_board(enPassant) and self.has_piece(enPassant) == 2:
                 enPassantPiece = self.get_piece(enPassant)
-                if enPassantPiece['piece'] == 1 and enPassantPiece['team'] == 0:
+                if enPassantPiece['piece'] == 1:
 
                     # Check if last move was the en passant pawn's double move
                     lastMove = self.history[len(self.history) - 1]
                     enPassantCoords = [ # The coordinates the enPassantPiece would have if it can be captured
-                        [1, enPassantPiece['coords'][1] - 1],
+                        [1, enPassantPiece['coords'][1]],
                         enPassantPiece['coords']
                     ]
 
+                    # Verify en passant
                     if lastMove == enPassantCoords:
-                        paths.append(enPassant)
+                        paths.append([enPassantMove])
 
             # En passant right
             enPassant = [piece['coords'][0], piece['coords'][1] + 1]
-            if self.is_on_board(enPassant):
+            if self.is_on_board(enPassant) and self.has_piece(enPassant) == 2:
                 enPassantPiece = self.get_piece(enPassant)
-                if enPassantPiece['piece'] == 1 and enPassantPiece['team'] == 0:
+                enPassantMove = [piece['coords'][0] - 1, piece['coords'][1] + 1]
+                if enPassantPiece['piece'] == 1:
 
                     # Check if last move was the en passant pawn's double move
                     lastMove = self.history[len(self.history) - 1]
                     enPassantCoords = [ # The coordinates the enPassantPiece would have if it can be captured 
-                        [1, enPassantPiece['coords'][1] + 1],
+                        [1, enPassantPiece['coords'][1]],
                         enPassantPiece['coords']
                     ]
 
+                    # Verify en passant
                     if lastMove == enPassantCoords:
-                        paths.append(enPassant)
+                        paths.append([enPassantMove])
 
         log.info('Pawn paths for piece generated.')
         log.info('Piece:')
@@ -290,8 +300,8 @@ class Chess:
             path = []
             for i in range(2):
                 coords = [piece['coords'][0] + (i + 1), piece['coords'][1]]
-                if not self.has_piece(coords):
-                    path.append([coords])
+                if self.has_piece(coords) == 0:
+                    path.append(coords)
                 else:
                     break
             paths.append(path)
@@ -299,19 +309,19 @@ class Chess:
         # Normal move
         elif piece['coords'][0] < 7:
             coords = [piece['coords'][0] + 1, piece['coords'][1]]
-            if not self.has_piece(coords):
+            if self.has_piece(coords) == 0:
                 paths.append([coords])
 
         # Capture left
         captureLeft = [piece['coords'][0] + 1, piece['coords'][1] - 1]
         if self.is_on_board(captureLeft):
-            if not self.has_piece(captureLeft):
+            if self.has_piece(captureLeft) == 1:
                 paths.append([captureLeft])
 
         # Capture right
         captureRight = [piece['coords'][0] + 1, piece['coords'][1] + 1]
         if self.is_on_board(captureRight):
-            if not self.has_piece(captureRight):
+            if self.has_piece(captureRight) == 1:
                 paths.append([captureRight])
 
         # En passant
@@ -319,9 +329,10 @@ class Chess:
 
             # En passant left
             enPassant = [piece['coords'][0], piece['coords'][1] - 1]
-            if self.is_on_board(enPassant):
+            enPassantMove = [piece['coords'][0] + 1, piece['coords'][1] - 1]
+            if self.is_on_board(enPassant) and self.has_piece(enPassant) == 1:
                 enPassantPiece = self.get_piece(enPassant)
-                if enPassantPiece['piece'] == 1 and enPassantPiece['team'] == 0:
+                if enPassantPiece['piece'] == 1:
 
                     # Check if last move was the en passant pawn's double move
                     lastMove = self.history[len(self.history) - 1]
@@ -330,12 +341,14 @@ class Chess:
                         enPassantPiece['coords']
                     ]
 
+                    # Verify en passant
                     if lastMove == enPassantCoords:
-                        paths.append([enPassant])
+                        paths.append([enPassantMove])
 
             # En passant right
             enPassant = [piece['coords'][0], piece['coords'][1] + 1]
-            if self.is_on_board(enPassant):
+            enPassantMove = [piece['coords'][0] + 1, piece['coords'][1] + 1]
+            if self.is_on_board(enPassant) and self.has_piece(enPassant) == 1:
                 enPassantPiece = self.get_piece(enPassant)
                 if enPassantPiece['piece'] == 1 and enPassantPiece['team'] == 0:
 
@@ -346,8 +359,9 @@ class Chess:
                         enPassantPiece['coords']
                     ]
 
+                    # Verify en passant
                     if lastMove == enPassantCoords:
-                        paths.append([enPassant])      
+                        paths.append([enPassantMove])      
 
         log.info('Pawn paths for piece generated.')
         log.info('Piece:')
@@ -368,9 +382,9 @@ class Chess:
 
         # North
         path = []
-        for i in range(piece['coords'][0], 0, -1):
+        for i in range(piece['coords'][0] - 1, -1, -1):
             hasPiece = self.has_piece([i, piece['coords'][1]])
-            if not hasPiece:
+            if hasPiece == 0:
                 path.append([i, piece['coords'][1]])
             elif hasPiece == 1:
                 break
@@ -381,9 +395,9 @@ class Chess:
 
         # South
         path = []
-        for i in range(piece['coords'][0], 8):
+        for i in range(piece['coords'][0] + 1, 8):
             hasPiece = self.has_piece([i, piece['coords'][1]])
-            if not hasPiece:
+            if hasPiece == 0:
                 path.append([i, piece['coords'][1]])
             elif hasPiece == 1:
                 break
@@ -395,10 +409,10 @@ class Chess:
         # Left
         #TODO: Castle
         path = []
-        for i in range(piece['coords'][1], 0, -1):
+        for i in range(piece['coords'][1] - 1, -1, -1):
             hasPiece = self.has_piece([piece['coords'][0], i])
-            if not hasPiece:
-                path.append([i, piece['coords'][1]])
+            if hasPiece == 0:
+                path.append([piece['coords'][0], i])
             elif hasPiece == 1:
                 break
             else:
@@ -409,10 +423,10 @@ class Chess:
         # Right
         #TODO: Castle
         path = []
-        for i in range(piece['coords'][1], 8):
+        for i in range(piece['coords'][1] + 1, 8):
             hasPiece = self.has_piece([piece['coords'][0], i])
-            if not hasPiece:
-                path.append([i, piece['coords'][1]])
+            if hasPiece == 0:
+                path.append([piece['coords'][0], i])
             elif hasPiece == 1:
                 break
             else:
@@ -436,9 +450,9 @@ class Chess:
 
         # North
         path = []
-        for i in range(piece['coords'][0], 0, -1):
+        for i in range(piece['coords'][0] - 1, -1, -1):
             hasPiece = self.has_piece([i, piece['coords'][1]])
-            if not hasPiece:
+            if hasPiece == 0:
                 path.append([i, piece['coords'][1]])
             elif hasPiece == 2:
                 break
@@ -449,9 +463,9 @@ class Chess:
 
         # South
         path = []
-        for i in range(piece['coords'][0], 8):
+        for i in range(piece['coords'][0] + 1, 8):
             hasPiece = self.has_piece([i, piece['coords'][1]])
-            if not hasPiece:
+            if hasPiece == 0:
                 path.append([i, piece['coords'][1]])
             elif hasPiece == 2:
                 break
@@ -463,10 +477,10 @@ class Chess:
         # Left
         #TODO: castle
         path = []
-        for i in range(piece['coords'][1], 0, -1):
+        for i in range(piece['coords'][1] - 1, -1, -1):
             hasPiece = self.has_piece([piece['coords'][0], i])
-            if not hasPiece:
-                path.append([i, piece['coords'][1]])
+            if hasPiece == 0:
+                path.append([piece['coords'][0], i])
             elif hasPiece == 2:
                 break
             else:
@@ -477,10 +491,10 @@ class Chess:
         # Right
         #TODO: Castle
         path = []
-        for i in range(piece['coords'][1], 8):
+        for i in range(piece['coords'][1] + 1, 8):
             hasPiece = self.has_piece([piece['coords'][0], i])
-            if not hasPiece:
-                path.append([i, piece['coords'][1]])
+            if hasPiece == 0:
+                path.append([piece['coords'][0], i])
             elif hasPiece == 2:
                 break
             else:
@@ -503,14 +517,14 @@ class Chess:
         paths = []
 
         # Top left
-        coords = [piece['coords'] - 2, piece['coords'] - 1]
+        coords = [piece['coords'][0] - 2, piece['coords'][1] - 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
         
         # Top right
-        coords = [piece['coords'] - 2, piece['coords'] + 1]
+        coords = [piece['coords'][0] - 2, piece['coords'][1] + 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
@@ -518,42 +532,42 @@ class Chess:
                 
 
         # Bottom left
-        coords = [piece['coords'] + 2, piece['coords'] - 1]
+        coords = [piece['coords'][0] + 2, piece['coords'][1] - 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
 
         # Bottom right
-        coords = [piece['coords'] + 2, piece['coords'] + 1]
+        coords = [piece['coords'][0] + 2, piece['coords'][1] + 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
 
         # Upper left
-        coords = [piece['coords'] - 1, piece['coords'] - 2]
+        coords = [piece['coords'][0] - 1, piece['coords'][1] - 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
 
         # Lower left
-        coords = [piece['coords'] + 1, piece['coords'] - 2]
+        coords = [piece['coords'][0] + 1, piece['coords'][1] - 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
 
         # Upper right
-        coords = [piece['coords'] - 1, piece['coords'] + 2]
+        coords = [piece['coords'][0] - 1, piece['coords'][1] + 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
                 paths.append([coords])
 
         # Lower right
-        coords = [piece['coords'] + 1, piece['coords'] + 2]
+        coords = [piece['coords'][0] + 1, piece['coords'][1] + 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 1:
@@ -565,7 +579,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
     
     def get_black_knight_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -575,14 +589,14 @@ class Chess:
         paths = []
 
         # Top left
-        coords = [piece['coords'] - 2, piece['coords'] - 1]
+        coords = [piece['coords'][0] - 2, piece['coords'][1] - 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
         
         # Top right
-        coords = [piece['coords'] - 2, piece['coords'] + 1]
+        coords = [piece['coords'][0] - 2, piece['coords'][1] + 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
@@ -590,42 +604,42 @@ class Chess:
                 
 
         # Bottom left
-        coords = [piece['coords'] + 2, piece['coords'] - 1]
+        coords = [piece['coords'][0] + 2, piece['coords'][1] - 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
 
         # Bottom right
-        coords = [piece['coords'] + 2, piece['coords'] + 1]
+        coords = [piece['coords'][0] + 2, piece['coords'][1] + 1]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
 
         # Upper left
-        coords = [piece['coords'] - 1, piece['coords'] - 2]
+        coords = [piece['coords'][0] - 1, piece['coords'][1] - 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
 
         # Lower left
-        coords = [piece['coords'] + 1, piece['coords'] - 2]
+        coords = [piece['coords'][0] + 1, piece['coords'][1] - 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
 
         # Upper right
-        coords = [piece['coords'] - 1, piece['coords'] + 2]
+        coords = [piece['coords'][0] - 1, piece['coords'][1] + 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
                 paths.append([coords])
 
         # Lower right
-        coords = [piece['coords'] + 1, piece['coords'] + 2]
+        coords = [piece['coords'][0] + 1, piece['coords'][1] + 2]
         if self.is_on_board(coords):
             hasPiece = self.has_piece(coords)
             if not hasPiece == 2:
@@ -636,7 +650,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_white_bishop_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -1194,5 +1208,9 @@ class Chess:
     def from_json(self, json):
         """ Convert JSON data to chess game state """
         log.debug('Converting Chess from JSON')
-        
+
+        self.white = json['white']
+        self.black = json['black']
+        self.history = json['history']
+        self.castle = json['castle']
         return
