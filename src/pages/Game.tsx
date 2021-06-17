@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import './Game.scss';
 import * as chess from '../api/chess';
 import ChessBoard from '../components/chess/ChessBoard';
 

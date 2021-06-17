@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { Switch } from 'react-router';
 
-import './App.scss';
+import './sass/main.scss';
 import Home from './pages/Home';
 import Game from './pages/Game';
 import logo from './logo.svg';

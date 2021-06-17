@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import "./ChessBoard.scss";
 import ChessSquare from "./ChessSquare";
 import { IClientChessMove, IClientChessState, coord } from "../../types";
 import * as api from "../../api/chess";
@@ -73,11 +72,11 @@ function ChessBoard() {
 		handle_start_game();
 	}, []);
 
-    // Move handler
-    useEffect(() => {
-        fromCoords && get_valid_paths();
-        (fromCoords && toCoords) && make_move();
-    }, [fromCoords, toCoords]);
+	// Move handler
+	useEffect(() => {
+		fromCoords && get_valid_paths();
+		fromCoords && toCoords && make_move();
+	}, [fromCoords, toCoords]);
 
 	/** Start game  */
 	const handle_start_game = () => {
@@ -97,7 +96,7 @@ function ChessBoard() {
 		if (!fromCoords || !toCoords) return false;
 		api.make_move([fromCoords, toCoords])
 			.then((newState) => {
-                console.log(newState)
+				console.log(newState);
 				newState && setChessState(newState);
 			})
 			.catch((err) => {

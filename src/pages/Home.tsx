@@ -1,6 +1,5 @@
 import React from 'react';
 
-import './Home.scss';
 import ChessBoard from '../components/chess/ChessBoard';
 
 
@@ -8,7 +7,6 @@ import ChessBoard from '../components/chess/ChessBoard';
 function Home() {
     return (
         <div className="Home">
-            home
             <ChessBoard />
         </div>
     )

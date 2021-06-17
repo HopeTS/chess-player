@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaChessPawn, FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing } from "react-icons/fa";
 
-import "./ChessPiece.scss";
 import { IChessPiece } from "../../types";
 
 /** Chess piece (image) */

@@ -1,0 +1,7 @@
+@mixin page {
+
+}
+
+.page {
+    @include page;
+}

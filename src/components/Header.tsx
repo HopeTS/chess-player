@@ -1,16 +1,8 @@
-import React from 'react';
-
-import './Header.scss';
-
+import React from "react";
 
 /** Master Header component */
 function Header() {
-    return (
-        <div className="Header">
-
-        </div>
-    )
+	return <div className="Header"></div>;
 }
-
 
 export default Header;
