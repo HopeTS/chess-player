@@ -337,7 +337,7 @@ class Chess:
                     # Check if last move was the en passant pawn's double move
                     lastMove = self.history[len(self.history) - 1]
                     enPassantCoords = [ # The coordinates the enPassantPiece would have if it can be captured
-                        [6, enPassantPiece['coords'][1] - 1],
+                        [6, enPassantPiece['coords'][1]],
                         enPassantPiece['coords']
                     ]
 
@@ -355,7 +355,7 @@ class Chess:
                     # Check if last move was the en passant pawn's double move
                     lastMove = self.history[len(self.history) - 1]
                     enPassantCoords = [ # The coordinates the enPassantPiece would have if it can be captured 
-                        [6, enPassantPiece['coords'][1] + 1],
+                        [6, enPassantPiece['coords'][1]],
                         enPassantPiece['coords']
                     ]
 
@@ -661,9 +661,9 @@ class Chess:
 
         # NE
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -672,13 +672,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # NW
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -687,13 +689,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SE
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -702,13 +706,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SW
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -717,6 +723,8 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         log.info('Bishop paths for piece generated.')
@@ -724,7 +732,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_black_bishop_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -735,9 +743,9 @@ class Chess:
 
         # NE
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -746,13 +754,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # NW
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -761,13 +771,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SE
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -776,13 +788,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SW
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -791,6 +805,8 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         log.info('Bishop paths for piece generated.')
@@ -798,7 +814,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_white_queen_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -865,9 +881,9 @@ class Chess:
 
         # NE
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -876,13 +892,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # NW
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -891,13 +909,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SE
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -906,13 +926,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SW
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 1:
                     break
@@ -921,6 +943,8 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         log.info('Queen paths for piece generated.')
@@ -928,7 +952,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_black_queen_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -995,9 +1019,9 @@ class Chess:
 
         # NE
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -1006,13 +1030,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # NW
         path = []
-        for i in range(piece['coords'][0] - 1, -1, -1):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] - i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -1021,13 +1047,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SE
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] + 1, 8):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] + i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -1036,13 +1064,15 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         # SW
         path = []
-        for i in range(piece['coords'][0] + 1, 8):
-            for j in range(piece['coords'][1] - 1, -1, -1):
-                coords = [i, j]
+        for i in range(1, 8):
+            coords = [piece['coords'][0] + i, piece['coords'][1] - i]
+            if self.is_on_board(coords):
                 hasPiece = self.has_piece(coords)
                 if hasPiece == 2:
                     break
@@ -1051,6 +1081,8 @@ class Chess:
                     break
                 else:
                     path.append(coords)
+            else:
+                break
         paths.append(path)
 
         log.info('Queen paths for piece generated.')
@@ -1058,7 +1090,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_white_king_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
