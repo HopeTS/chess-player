@@ -92,6 +92,7 @@ class Chess:
         # Check if it is within their legal moves
         isLegal = False
         legalMovePaths = self.get_moves(piece)
+        print("legalMovePaths", legalMovePaths)
         for legalMovePath in legalMovePaths:
             for legalMove in legalMovePath:
                 if move[1] == legalMove:
@@ -1128,18 +1129,41 @@ class Chess:
                 paths.append([coords])
 
         # NE
-
+        coords = [piece['coords'][0] - 1, piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
 
         # NW
+        coords = [piece['coords'][0] - 1, piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
         # SE
+        coords = [piece['coords'][0] + 1, piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
         # SW
+        coords = [piece['coords'][0] + 1, piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 1:
+                paths.append([coords])
+
+        #TODO: Castle
 
         log.info('King paths for piece generated.')
         log.info('Piece:')
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
     
     def get_black_king_moves(self, piece: PieceDict) -> "list[list[list[int, int]]]" or None:
@@ -1148,6 +1172,62 @@ class Chess:
 
         paths = []
 
+        # North
+        coords = [piece['coords'][0] - 1, piece['coords'][1]]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # South
+        coords = [piece['coords'][0] + 1, piece['coords'][1]]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # East
+        coords = [piece['coords'][0], piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # West
+        coords = [piece['coords'][0], piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # NE
+        coords = [piece['coords'][0] - 1, piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # NW
+        coords = [piece['coords'][0] - 1, piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # SE
+        coords = [piece['coords'][0] + 1, piece['coords'][1] + 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
+        # SW
+        coords = [piece['coords'][0] + 1, piece['coords'][1] - 1]
+        if self.is_on_board(coords):
+            hasPiece = self.has_piece(coords)
+            if not hasPiece == 2:
+                paths.append([coords])
+
         
 
         log.info('King paths for piece generated.')
@@ -1155,7 +1235,7 @@ class Chess:
         log.info(piece)
         log.info('Paths:')
         log.info(paths)
-        return
+        return paths
 
 
     def get_piece(self, coords: list) -> PieceDict or None:
@@ -1221,7 +1301,6 @@ class Chess:
 
         log.info('castle:')
         log.info(self.castle)
-
         return
 
 
