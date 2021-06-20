@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 
 import ChessSquare from "./ChessSquare";
 import { IClientChessMove, IClientChessState, coord } from "../../types";
-import * as api from "../../api/chess";
+import * as api from "../../api/api";
+import * as utils from "./utils/utils";
 
 /** Chess board */
 function ChessBoard() {
@@ -80,7 +81,7 @@ function ChessBoard() {
 
 	/** Start game  */
 	const handle_start_game = () => {
-		api.start_game()
+		api.chess.start_game()
 			.then((startState) => {
 				startState && setChessState(startState);
 			})
@@ -94,7 +95,7 @@ function ChessBoard() {
 		// TODO: Make endpoint calls
 		console.log("moveCoords", fromCoords, toCoords);
 		if (!fromCoords || !toCoords) return false;
-		api.make_move([fromCoords, toCoords])
+		api.chess.make_move([fromCoords, toCoords])
 			.then((newState) => {
 				console.log(newState);
 				newState && setChessState(newState);
@@ -109,7 +110,7 @@ function ChessBoard() {
 
 	/** Calculate valid paths of fromCoords */
 	const get_valid_paths = () => {
-		//TODO
+		//const newValidPaths = utils.valid_paths.get();
 		return;
 	};
 

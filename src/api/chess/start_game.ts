@@ -1,0 +1,16 @@
+// Handle all endpoints related to chess games
+import { IServerChessState, IClientChessState } from "../../types";
+
+/** GET chess/start endpoint and convert to client data */
+export function start_game(): Promise<IClientChessState | false> {
+	return fetch(`${process.env.REACT_APP_FLASK_SERVER}/chess/start_game`)
+		.then((res) => res.json())
+		.then((data: IServerChessState) => {
+			const clientData: IClientChessState = { ...data };
+			return clientData;
+		})
+		.catch((err) => {
+			console.error(err);
+			return false;
+		});
+}
