@@ -1,14 +1,27 @@
 .ChessSquare {
-    pointer-events: stroke;
-    cursor: pointer;
-    	
-    // White tile
+	pointer-events: stroke;
+	cursor: pointer;
+    position: relative;
+
+	// White tile
 	&[data-color="false"] {
 		background: var(--chess-white-tile);
 	}
 
-    // Black tile
+	// Black tile
 	&[data-color="true"] {
 		background: var(--chess-black-tile);
 	}
+}
+
+.ChessSquare__valid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    &[data-active=true] {
+        opacity: 0.4;
+        background: green;    
+    }
 }

@@ -1,4 +1,4 @@
-import { IServerChessState, IClientChessState, move } from "../../types";
+import { IServerChessState, IClientChessState, move, movePath, coord } from "../../types";
 
 /** POST chess/move endpoint and convert to client data */
 export function make_move(move: move): Promise<IClientChessState | false> {

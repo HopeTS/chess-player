@@ -6,6 +6,9 @@ export type coord = [number, number];
 /** Chess move */
 export type move = [coord, coord];
 
+/** Chess move path */
+export type movePath = coord[];
+
 /** Chess piece (0:blank, 1:pawn, 2:rook, 3:knight, 4:bishop, 5:queen, 6:king) */
 export type piece = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -13,83 +16,85 @@ export type piece = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type team = 0 | 1;
 
 /** Castle state */
-export type castle = [
-    [boolean, boolean, boolean],
-    [boolean, boolean, boolean]
-];
+export type castle = [[boolean, boolean, boolean], [boolean, boolean, boolean]];
 
 /** Chess board */
 export type board = [
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece],
-    [piece, piece, piece, piece, piece, piece, piece, piece]
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece],
+	[piece, piece, piece, piece, piece, piece, piece, piece]
 ];
 
 /** State of chess game (sent over the network) */
 export interface IServerChessState {
+	/** White team board */
+	white: board;
 
-    /** White team board */
-    white: board;
+	/** Black team board */
+	black: board;
 
-    /** Black team board */
-    black: board;
+	/** Move history (list of moveFrom - moveTo coordinates) */
+	history: [move?];
 
-    /** Move history (list of moveFrom - moveTo coordinates) */
-    history: [move?];
-
-    /** Castle eligibility */
-    castle: castle;
+	/** Castle eligibility */
+	castle: castle;
 }
-
 
 /** State of chess game (handled Client side) */
 export interface IClientChessState extends IServerChessState {
+	/** Is white in check */
+	whiteCheck?: boolean;
 
-    /** Is white in check */
-    whiteCheck?: boolean;
+	/** Is black in check */
+	blackCheck?: boolean;
 
-    /** Is black in check */
-    blackCheck?: boolean;
+	/** Is white in checkmate */
+	whiteCheckMate?: boolean;
 
-    /** Is white in checkmate */
-    whiteCheckMate?: boolean;
-
-    /** Is black in checkmate */
-    blackCheckMate?: boolean;
+	/** Is black in checkmate */
+	blackCheckMate?: boolean;
 }
-
 
 /** Chess Move coordinate (handled Client side) */
 export interface IClientChessMove {
-    from: coord;
-    to: coord;
+	from: coord;
+	to: coord;
 }
 
 /** Chess Square */
 export interface IChessSquare {
-    coords: coord;
-    chessState: IClientChessState;
+	coords: coord;
+	chessState: IClientChessState;
+	pieceFocused: boolean;
+	validMoves: coord[];
 
-    /** Select piece (pass down from board to piece) */
-    select_piece: () => void;
+	/** Select piece (pass down from board to piece) */
+	select_piece: () => void;
 
-    /** Cancel move (pass down from board to piece) */
-    cancel_move: () => void;
+	/** Cancel move (pass down from board to piece) */
+	cancel_move: () => void;
 }
 
-/** Chess piece */
-export interface IChessPiece  {
-    piece: piece;
-    team: team;
+/** Chess piece data */
+export interface IChessPieceData {
+	piece: piece;
+	team: team;
+    coords: coord
+}
 
-    /** Select piece */
-    select_piece: () => void;
+/** Chess piece component */
+export interface IChessPiece {
+	piece: piece;
+	team: team;
 
-    /** Cancel move */
-    cancel_move: () => void;
+	/** Select piece */
+	select_piece: () => void;
+
+	/** Cancel move */
+	cancel_move: () => void;
 }

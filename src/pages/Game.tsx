@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import * as chess from '../api/chess';
+import * as chess from '../api/chess/chess';
 import ChessBoard from '../components/chess/ChessBoard';
 
 
