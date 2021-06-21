@@ -39,7 +39,7 @@ export interface IServerChessState {
 	black: board;
 
 	/** Move history (list of moveFrom - moveTo coordinates) */
-	history: [move?];
+	history: move[];
 
 	/** Castle eligibility */
 	castle: castle;
