@@ -1,6 +1,7 @@
 import { coord, IChessPieceData, IClientChessState, movePath } from "../../../../types";
 import * as possible from "../possible_paths/possible_paths";
 
+/** Get all valid moves of a rook given the state of the chess board */
 export function rook(chessState: IClientChessState, piece: IChessPieceData): coord[] {
 	let validMoves: coord[] = [];
     const possiblePaths = possible.rook(piece.coords);

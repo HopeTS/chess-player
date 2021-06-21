@@ -1,9 +1,10 @@
 import { coord, IChessPieceData, IClientChessState, movePath } from "../../../../types";
 import * as possible from "../possible_paths/possible_paths";
 
+/** Get all valid moves of a queen given the state of the chess board */
 export function queen(chessState: IClientChessState, piece: IChessPieceData): coord[] {
 	let validMoves: coord[] = [];
-    const possiblePaths = possible.queen(piece.coords);
+	const possiblePaths = possible.queen(piece.coords);
 
 	// Create relative board variables
 	const sameTeam = piece.team === 0 ? chessState.white : chessState.black;
@@ -29,7 +30,7 @@ export function queen(chessState: IClientChessState, piece: IChessPieceData): co
 			else validMoves.push(currentCoords);
 		}
 	}
-    
-    //TODO: Remove all moves that would put the king in check
+
+	//TODO: Remove all moves that would put the king in check
 	return validMoves;
 }

@@ -2,6 +2,7 @@ import { coord, IChessPieceData, IClientChessState, movePath } from "../../../..
 import { has_piece } from "../has_piece";
 import * as possible from "../possible_paths/possible_paths";
 
+/** Get all valid moves of a king given the state of the chess board */
 export function king(chessState: IClientChessState, piece: IChessPieceData): coord[] {
     let validMoves: coord[] = []
     const possiblePaths = possible.king(piece.coords)
