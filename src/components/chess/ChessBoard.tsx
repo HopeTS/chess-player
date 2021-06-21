@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 
 import ChessSquare from "./ChessSquare";
-import { IClientChessMove, IClientChessState, coord } from "../../types";
+import { IClientChessMove, IClientChessState, coord, IChessPieceData } from "../../types";
 import * as api from "../../api/api";
 import * as utils from "./utils/utils";
+import { get_turn } from "./utils/get_turn";
 
 /** Chess board */
 function ChessBoard() {
@@ -96,10 +97,6 @@ function ChessBoard() {
 			});
 	};
 
-	useEffect(() => {
-		console.log(validMoves);
-	}, [validMoves]);
-
 	/** Make move */
 	const make_move = () => {
 		if (!fromCoords || !toCoords) return false;
@@ -126,16 +123,28 @@ function ChessBoard() {
 
 	/** Handle piece selection (piece onClick) */
 	const select_piece = (coords: coord) => {
-		console.log("Piece selected", coords);
-
-		setValidMoves(utils.valid_moves.get(chessState, coords));
-
+		// Pick up piece
 		if (!fromCoords) {
-			console.log("step 1");
+			// Get selected piece
+			const piece = utils.get_piece(chessState, coords);
+			if (!piece) return;
+
 			setFromCoords(coords);
-		} else {
-			console.log("step 2");
+			update_valid_moves(piece);
+		}
+
+		// Place piece
+		else {
 			setToCoords(coords);
+		}
+		return;
+	};
+
+	/** Handler for updating validMoves */
+	const update_valid_moves = (piece: IChessPieceData) => {
+		// Ensure it is their turn
+		if (piece.team === get_turn(chessState.history)) {
+			setValidMoves(utils.valid_moves.get(chessState, piece.coords));
 		}
 		return;
 	};
