@@ -70,8 +70,8 @@ export interface IClientChessMove {
 export interface IChessSquare {
 	coords: coord;
 	chessState: IClientChessState;
-	pieceFocused: boolean;
 	validMoves: coord[];
+    fromCoords: coord | null;
 
 	/** Select piece (pass down from board to piece) */
 	select_piece: () => void;
@@ -91,10 +91,24 @@ export interface IChessPieceData {
 export interface IChessPiece {
 	piece: piece;
 	team: team;
+    fromCoords: IChessSquare['fromCoords'];
+    coords: coord;
 
 	/** Select piece */
 	select_piece: () => void;
 
 	/** Cancel move */
 	cancel_move: () => void;
+}
+
+/** Check status */
+export interface IChessCheckStatus {
+    white: boolean;
+    black: boolean;
+}
+
+/** Selected piece component */
+export interface ISelectedPiece {
+    piece: piece;
+    team?: team;
 }

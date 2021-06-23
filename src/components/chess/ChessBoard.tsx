@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 import ChessSquare from "./ChessSquare";
-import { IClientChessMove, IClientChessState, coord, IChessPieceData } from "../../types";
+import { IClientChessMove, IClientChessState, coord, IChessPieceData, piece, ISelectedPiece } from "../../types";
 import * as api from "../../api/api";
 import * as utils from "./utils/utils";
 import { get_turn } from "./utils/get_turn";
+import SelectedPiece from "./SelectedPiece";
 
 /** Chess board */
 function ChessBoard() {
@@ -41,11 +42,11 @@ function ChessBoard() {
 	let [fromCoords, setFromCoords] = useState<IClientChessMove["from"] | null>(null);
 	let [toCoords, setToCoords] = useState<IClientChessMove["to"] | null>(null);
 
-	// Flag for whether or not a piece is currently focused
-	let [pieceFocused, setPieceFocused] = useState<boolean>(false);
-
 	// Array of coordinates of valid moves of focused piece
 	let [validMoves, setValidMoves] = useState<coord[]>([]);
+
+	// Selected piece (pass down to SelectedPiece)
+	let [selectedPiece, setSelectedPiece] = useState<ISelectedPiece>({piece: 0});
 
 	/** Generate board square components */
 	const construct_board = (): JSX.Element[] => {
@@ -58,8 +59,8 @@ function ChessBoard() {
 					<ChessSquare
 						coords={[i, j]}
 						chessState={chessState}
-						pieceFocused={pieceFocused}
 						validMoves={validMoves}
+                        fromCoords={fromCoords}
 						key={`${i}${j}`}
 						select_piece={() => select_piece([i, j])}
 						cancel_move={() => cancel_move()}
@@ -81,8 +82,8 @@ function ChessBoard() {
 
 	// Move handler
 	useEffect(() => {
-		fromCoords && get_valid_paths();
-		fromCoords && toCoords && make_move();
+		if (fromCoords && toCoords) make_move();
+        if (!fromCoords) setSelectedPiece({piece: 0});
 	}, [fromCoords, toCoords]);
 
 	/** Start game  */
@@ -99,8 +100,19 @@ function ChessBoard() {
 
 	/** Make move */
 	const make_move = () => {
+		// Ensure move is complete
 		if (!fromCoords || !toCoords) return false;
 
+		// Ensure move is valid
+		let moveIsValid = false;
+		for (let i = 0; i < validMoves.length; i++) {
+			if (validMoves[i][0] === toCoords[0] && validMoves[i][1] === toCoords[1]) {
+				moveIsValid = true;
+			}
+		}
+		if (!moveIsValid) return false;
+
+		// Send move data to server
 		api.chess
 			.make_move([fromCoords, toCoords])
 			.then((newState) => {
@@ -111,32 +123,35 @@ function ChessBoard() {
 				console.error(err);
 			});
 
+		// Clear move coords
 		cancel_move();
 		return;
 	};
 
-	/** Calculate valid paths of fromCoords */
-	const get_valid_paths = () => {
-		//const newValidPaths = utils.valid_paths.get();
+	/** Handle picking up piece */
+	const pick_up_piece = (coords: coord) => {
+		// Get selected piece
+		const piece = utils.get_piece(chessState, coords);
+
+		// Make sure piece can move this turn
+		if (!piece) return;
+		if (piece.team !== get_turn(chessState.history)) return;
+
+		setFromCoords(coords);
+		if (piece) setSelectedPiece({...piece});
+		update_valid_moves(piece);
 		return;
+	};
+
+	/** Handle placing piece */
+	const place_piece = (coords: coord) => {
+		setToCoords(coords);
 	};
 
 	/** Handle piece selection (piece onClick) */
 	const select_piece = (coords: coord) => {
-		// Pick up piece
-		if (!fromCoords) {
-			// Get selected piece
-			const piece = utils.get_piece(chessState, coords);
-			if (!piece) return;
-
-			setFromCoords(coords);
-			update_valid_moves(piece);
-		}
-
-		// Place piece
-		else {
-			setToCoords(coords);
-		}
+		if (!fromCoords) pick_up_piece(coords);
+		else place_piece(coords);
 		return;
 	};
 
@@ -153,10 +168,16 @@ function ChessBoard() {
 	const cancel_move = () => {
 		setFromCoords(null);
 		setToCoords(null);
+        setSelectedPiece({piece: 0})
 		setValidMoves([]);
 	};
 
-	return <div className="ChessBoard">{squares.map((square) => square)}</div>;
+	return (
+		<div className="ChessBoard">
+			{squares.map((square) => square)}
+			<SelectedPiece {...selectedPiece} />
+		</div>
+	);
 }
 
 export default ChessBoard;

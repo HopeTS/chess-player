@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChessPawn, FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing } from "react-icons/fa";
 
-import { IChessPiece } from "../../types";
+import { IChessPiece, piece } from "../../types";
 
 /** Chess piece (image) */
 function ChessPiece(props: IChessPiece) {
@@ -16,11 +16,21 @@ function ChessPiece(props: IChessPiece) {
 		6: <FaChessKing size="30px" />,
 	};
 
-	/** Handle click */
+    const [piece, setPiece] = useState<piece>(0);
+
+    useEffect(() => {
+        // Check whether or not current piece is focused
+        if (props.fromCoords && props.fromCoords[0] === props.coords[0] && props.fromCoords[1] === props.coords[1]) {
+            setPiece(0)
+        } else setPiece(props.piece)
+    }, [props.piece, props.fromCoords])
+
+	/** Handle left click */
 	const handle_click = (e: any) => {
 		props.select_piece();
 	};
 
+    /** Handle right click */
 	const handle_right_click = (e: any) => {
 		e.preventDefault();
 		props.cancel_move();
@@ -30,10 +40,11 @@ function ChessPiece(props: IChessPiece) {
 		<div
 			className="ChessPiece"
 			data-team={team}
-			onClick={(e) => handle_click(e)}
+			onMouseDown={(e) => handle_click(e)}
+            onMouseUp={(e) => handle_click(e)}
 			onContextMenu={(e) => handle_right_click(e)}
 		>
-			{pieces[props.piece]}
+			{pieces[piece]}
 		</div>
 	);
 }

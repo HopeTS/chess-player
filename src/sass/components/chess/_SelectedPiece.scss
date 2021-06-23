@@ -1,0 +1,17 @@
+.SelectedPiece {
+	position: absolute;
+	transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    &[data-team="white"] {
+		svg {
+			color: var(--chess-white-color);
+		}
+	}
+
+	&[data-team="black"] {
+		svg {
+			color: var(--chess-black-color);
+		}
+	}
+}

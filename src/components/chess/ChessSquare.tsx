@@ -49,6 +49,8 @@ function ChessSquare(props: IChessSquare) {
 				<ChessPiece
 					piece={piece}
 					team={team}
+                    coords={props.coords}
+                    fromCoords={props.fromCoords}
 					select_piece={props.select_piece}
 					cancel_move={props.cancel_move}
 				/>
