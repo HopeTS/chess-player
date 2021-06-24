@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import ChessSquare from "./ChessSquare";
-import { IClientChessMove, IClientChessState, coord, IChessPieceData, piece, ISelectedPiece } from "../../types";
+import { IClientChessMove, IClientChessState, coord, IChessPieceData, ISelectedPiece } from "../../types";
 import * as api from "../../api/api";
 import * as utils from "./utils/utils";
-import { get_turn } from "./utils/get_turn";
 import SelectedPiece from "./SelectedPiece";
 
 /** Chess board */
@@ -46,7 +45,7 @@ function ChessBoard() {
 	let [validMoves, setValidMoves] = useState<coord[]>([]);
 
 	// Selected piece (pass down to SelectedPiece)
-	let [selectedPiece, setSelectedPiece] = useState<ISelectedPiece>({piece: 0});
+	let [selectedPiece, setSelectedPiece] = useState<ISelectedPiece>({ piece: 0 });
 
 	/** Generate board square components */
 	const construct_board = (): JSX.Element[] => {
@@ -60,7 +59,7 @@ function ChessBoard() {
 						coords={[i, j]}
 						chessState={chessState}
 						validMoves={validMoves}
-                        fromCoords={fromCoords}
+						fromCoords={fromCoords}
 						key={`${i}${j}`}
 						select_piece={() => select_piece([i, j])}
 						cancel_move={() => cancel_move()}
@@ -80,26 +79,8 @@ function ChessBoard() {
 		handle_start_game();
 	}, []);
 
-	// Move handler
-	useEffect(() => {
-		if (fromCoords && toCoords) make_move();
-        if (!fromCoords) setSelectedPiece({piece: 0});
-	}, [fromCoords, toCoords]);
-
-	/** Start game  */
-	const handle_start_game = () => {
-		api.chess
-			.start_game()
-			.then((startState) => {
-				startState && setChessState(startState);
-			})
-			.catch((e) => {
-				console.error(e);
-			});
-	};
-
 	/** Make move */
-	const make_move = () => {
+	const make_move = useCallback(() => {
 		// Ensure move is complete
 		if (!fromCoords || !toCoords) return false;
 
@@ -126,22 +107,55 @@ function ChessBoard() {
 		// Clear move coords
 		cancel_move();
 		return;
+	}, [fromCoords, toCoords, validMoves]);
+
+	// Move handler
+	useEffect(() => {
+		if (fromCoords && toCoords) make_move();
+		if (!fromCoords) setSelectedPiece({ piece: 0 });
+	}, [fromCoords, toCoords, make_move]);
+
+	/** Start game  */
+	const handle_start_game = () => {
+		api.chess
+			.start_game()
+			.then((startState) => {
+				startState && setChessState(startState);
+			})
+			.catch((e) => {
+				console.error(e);
+			});
 	};
+
+	/** Handler for updating validMoves */
+	const update_valid_moves = useCallback(
+		(piece: IChessPieceData) => {
+			// Ensure it is their turn
+			if (piece.team === utils.get_turn(chessState.history)) {
+				setValidMoves(utils.valid_moves.get(chessState, piece.coords));
+			}
+			return;
+		},
+		[chessState]
+	);
 
 	/** Handle picking up piece */
-	const pick_up_piece = (coords: coord) => {
-		// Get selected piece
-		const piece = utils.get_piece(chessState, coords);
+	const pick_up_piece = useCallback(
+		(coords: coord) => {
+			// Get selected piece
+			const piece = utils.pieces.get_piece(chessState, coords);
 
-		// Make sure piece can move this turn
-		if (!piece) return;
-		if (piece.team !== get_turn(chessState.history)) return;
+			// Make sure piece can move this turn
+			if (!piece) return;
+			if (piece.team !== utils.get_turn(chessState.history)) return;
 
-		setFromCoords(coords);
-		if (piece) setSelectedPiece({...piece});
-		update_valid_moves(piece);
-		return;
-	};
+			setFromCoords(coords);
+			if (piece) setSelectedPiece({ ...piece });
+			update_valid_moves(piece);
+			return;
+		},
+		[chessState, update_valid_moves]
+	);
 
 	/** Handle placing piece */
 	const place_piece = (coords: coord) => {
@@ -149,26 +163,20 @@ function ChessBoard() {
 	};
 
 	/** Handle piece selection (piece onClick) */
-	const select_piece = (coords: coord) => {
-		if (!fromCoords) pick_up_piece(coords);
-		else place_piece(coords);
-		return;
-	};
-
-	/** Handler for updating validMoves */
-	const update_valid_moves = (piece: IChessPieceData) => {
-		// Ensure it is their turn
-		if (piece.team === get_turn(chessState.history)) {
-			setValidMoves(utils.valid_moves.get(chessState, piece.coords));
-		}
-		return;
-	};
+	const select_piece = useCallback(
+		(coords: coord) => {
+			if (!fromCoords) pick_up_piece(coords);
+			else place_piece(coords);
+			return;
+		},
+		[fromCoords, pick_up_piece]
+	);
 
 	/** Cancel move */
 	const cancel_move = () => {
 		setFromCoords(null);
 		setToCoords(null);
-        setSelectedPiece({piece: 0})
+		setSelectedPiece({ piece: 0 });
 		setValidMoves([]);
 	};
 

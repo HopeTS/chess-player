@@ -16,21 +16,21 @@ function ChessPiece(props: IChessPiece) {
 		6: <FaChessKing size="30px" />,
 	};
 
-    const [piece, setPiece] = useState<piece>(0);
+	const [piece, setPiece] = useState<piece>(0);
 
-    useEffect(() => {
-        // Check whether or not current piece is focused
-        if (props.fromCoords && props.fromCoords[0] === props.coords[0] && props.fromCoords[1] === props.coords[1]) {
-            setPiece(0)
-        } else setPiece(props.piece)
-    }, [props.piece, props.fromCoords])
+	useEffect(() => {
+		// Check whether or not current piece is focused
+		if (props.fromCoords && props.fromCoords[0] === props.coords[0] && props.fromCoords[1] === props.coords[1]) {
+			setPiece(0);
+		} else setPiece(props.piece);
+	}, [props.piece, props.fromCoords, props.coords]);
 
 	/** Handle left click */
 	const handle_click = (e: any) => {
 		props.select_piece();
 	};
 
-    /** Handle right click */
+	/** Handle right click */
 	const handle_right_click = (e: any) => {
 		e.preventDefault();
 		props.cancel_move();
@@ -41,7 +41,7 @@ function ChessPiece(props: IChessPiece) {
 			className="ChessPiece"
 			data-team={team}
 			onMouseDown={(e) => handle_click(e)}
-            onMouseUp={(e) => handle_click(e)}
+			onMouseUp={(e) => handle_click(e)}
 			onContextMenu={(e) => handle_right_click(e)}
 		>
 			{pieces[piece]}
