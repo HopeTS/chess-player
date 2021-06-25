@@ -1,0 +1,4 @@
+(Attributions to add to the front end for free use license assets)
+
+chess-move sound: https://freesound.org/people/juskiddink/sounds/108615/
+chess-capture sound: https://freesound.org/people/edwin_p_manchester/sounds/3241/
