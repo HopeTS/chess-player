@@ -1,0 +1,20 @@
+.ChessBoardDevPanel {
+	display: flex;
+	flex-direction: column;
+}
+
+.ChessBoardDevPanel__control {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+
+	button {
+		margin: 1em;
+		background: lighten(#0e0e18, 10%);
+		border: 0;
+		padding: 8px 12px;
+		font-size: 1em;
+		color: white;
+		cursor: pointer;
+	}
+}

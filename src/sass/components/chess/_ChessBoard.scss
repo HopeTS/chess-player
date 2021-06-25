@@ -1,9 +1,13 @@
 .ChessBoard {
-    display: grid;
-    grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
-    grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
-    width: 400px;
-    height: 400px;
-    margin: 3em auto;
+	max-width: 600px;
+	margin: 0 auto;
 }
 
+.ChessBoard__board {
+	display: grid;
+	grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+	grid-template-rows: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+	width: 400px;
+	height: 400px;
+	margin: 3em auto;
+}
