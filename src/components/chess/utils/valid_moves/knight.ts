@@ -1,4 +1,4 @@
-import { coord, IChessPieceData, IClientChessState, movePath } from "../../../../types";
+import { coord, IChessPieceData, IClientChessState } from "../../../../types";
 import { get_pinned_piece_data } from "../check/get_pinned_piece_data";
 import { has_piece } from "../pieces/has_piece";
 import * as possible from "../possible_paths/possible_paths";

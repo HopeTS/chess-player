@@ -1,32 +1,25 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import { Switch } from 'react-router';
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import { Switch } from "react-router";
 
-import './sass/main.scss';
-import Home from './pages/Home';
-import Game from './pages/Game';
-import logo from './logo.svg';
-
+import "./sass/main.scss";
+import Home from "./pages/Home";
+import Game from "./pages/Game";
+import Dev from "./pages/Dev";
 
 function App() {
-    return (
-        <div className="App">
-            <Router>
-                <Switch>
-                    <Route 
-                        exact
-                        path="/"
-                        component={Home}
-                    />
+	return (
+		<div className="App">
+			<Router>
+				<Switch>
+					<Route exact path="/" component={Home} />
 
-                    <Route 
-                        path="/game"
-                        component={Game}
-                    />
-                </Switch>
-            </Router>
-        </div>
-    );
+					<Route path="/game" component={Game} />
+
+					<Route path="/dev" component={Dev} />
+				</Switch>
+			</Router>
+		</div>
+	);
 }
 
 export default App;

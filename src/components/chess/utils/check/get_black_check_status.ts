@@ -1,6 +1,4 @@
-import { IChessPieceData, IClientChessState, coord } from "../../../../types";
-import { get_white_pieces } from "../pieces/get_white_pieces";
-import * as valid_moves from "../valid_moves/valid_moves";
+import { IClientChessState, coord } from "../../../../types";
 import { get_white_threat_squares } from "./get_white_threat_squares";
 
 /** Check if black king is in check */
