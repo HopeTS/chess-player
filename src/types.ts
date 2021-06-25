@@ -119,3 +119,14 @@ export interface IPinnedPiece {
     pinningPiece: IChessPieceData;
     pathToKing: movePath;
 }
+
+/** Chess Board component */
+export interface IChessBoard {
+    dev?: boolean;
+}
+
+/** Chess Board Dev Panel component */
+export interface IChessBoardDevPanel {
+    chessState: IClientChessState;
+    handle_start_game: () => void;
+}
