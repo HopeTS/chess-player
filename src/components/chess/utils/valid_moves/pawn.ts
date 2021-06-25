@@ -2,6 +2,8 @@ import { coord, IChessPieceData, IClientChessState, move } from "../../../../typ
 import { get_piece } from "../pieces/get_piece";
 import { has_piece } from "../pieces/has_piece";
 import { is_on_board } from "../is_on_board";
+import { get_pinned_piece_data } from "../check/get_pinned_piece_data";
+import { strip_moves_outside_pin_path } from "./strip_moves_outside_pin_path";
 
 /** Get all valid moves of a pawn given the state of the chess board */
 export function pawn(chessState: IClientChessState, piece: IChessPieceData): coord[] {
@@ -25,7 +27,6 @@ export function pawn(chessState: IClientChessState, piece: IChessPieceData): coo
                     hasPiece = has_piece(chessState.white, moveCoords) || has_piece(chessState.black, moveCoords);
                     if (!hasPiece) validMoves.push(moveCoords);
                 }
-
             }
         }
 
@@ -179,5 +180,11 @@ export function pawn(chessState: IClientChessState, piece: IChessPieceData): coo
             }
         }
     }
+
+    // Check if piece is pinned, and remove invalid removes
+    const pinnedPiece = get_pinned_piece_data(chessState, piece);
+    if (!pinnedPiece) return validMoves;
+    validMoves = strip_moves_outside_pin_path(validMoves, pinnedPiece);
+
     return validMoves;
 }

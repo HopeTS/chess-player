@@ -1,4 +1,4 @@
-import { coord, IChessPieceData, movePath } from "../../../../types";
+import { IChessPieceData, movePath } from "../../../../types";
 import { bishop } from "./bishop";
 import { king } from "./king";
 import { knight } from "./knight";

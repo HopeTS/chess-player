@@ -1,4 +1,4 @@
-import { coord, IChessPieceData, IClientChessState, movePath, team } from "../../../../types";
+import { coord, IChessPieceData, IClientChessState, movePath } from "../../../../types";
 import { get_black_threat_squares } from "../check/get_black_threat_squares";
 import { get_white_threat_squares } from "../check/get_white_threat_squares";
 import { coords_match } from "../coords_match";

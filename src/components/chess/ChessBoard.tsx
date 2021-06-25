@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 
 import ChessSquare from "./ChessSquare";
-import { IClientChessMove, IClientChessState, coord, IChessPieceData, ISelectedPiece } from "../../types";
+import { IClientChessMove, IClientChessState, coord, IChessPieceData, ISelectedPiece, IChessBoard } from "../../types";
 import * as api from "../../api/api";
 import * as utils from "./utils/utils";
 import SelectedPiece from "./SelectedPiece";
+import ChessBoardDevPanel from "./ChessBoardDevPanel";
 
 /** Chess board */
-function ChessBoard() {
+function ChessBoard(props: IChessBoard) {
 	// State of chess game
 	let [chessState, setChessState] = useState<IClientChessState>({
 		white: [
@@ -79,6 +80,19 @@ function ChessBoard() {
 		handle_start_game();
 	}, []);
 
+	/** Move sound effect */
+	const play_move_sound = useCallback(() => {
+		try {
+			let soundPath = chessState.history.length
+				? "/dist/sound-fx/chess/chess-move.wav"
+				: "/dist/sound-fx/chess/chess-capture.wav";
+			let sound = new Audio(soundPath);
+			sound.play();
+		} catch (err) {
+			console.error(err);
+		}
+	}, [chessState]);
+
 	/** Make move */
 	const make_move = useCallback(() => {
 		// Ensure move is complete
@@ -97,7 +111,6 @@ function ChessBoard() {
 		api.chess
 			.make_move([fromCoords, toCoords])
 			.then((newState) => {
-				console.log(newState);
 				newState && setChessState(newState);
 			})
 			.catch((err) => {
@@ -180,10 +193,16 @@ function ChessBoard() {
 		setValidMoves([]);
 	};
 
+	// After every move hook
+	useEffect(() => {
+		play_move_sound();
+	}, [chessState, play_move_sound]);
+
 	return (
 		<div className="ChessBoard">
-			{squares.map((square) => square)}
+			<div className="ChessBoard__board">{squares.map((square) => square)}</div>
 			<SelectedPiece {...selectedPiece} />
+			{props.dev && <ChessBoardDevPanel handle_start_game={() => handle_start_game()} chessState={chessState} />}
 		</div>
 	);
 }

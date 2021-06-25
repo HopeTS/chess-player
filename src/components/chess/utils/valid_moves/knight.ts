@@ -1,6 +1,8 @@
 import { coord, IChessPieceData, IClientChessState, movePath } from "../../../../types";
+import { get_pinned_piece_data } from "../check/get_pinned_piece_data";
 import { has_piece } from "../pieces/has_piece";
 import * as possible from "../possible_paths/possible_paths";
+import { strip_moves_outside_pin_path } from "./strip_moves_outside_pin_path";
 
 /** Get all valid moves of a knight given the state of the chess board */
 export function knight(chessState: IClientChessState, piece: IChessPieceData): coord[] {
@@ -21,6 +23,9 @@ export function knight(chessState: IClientChessState, piece: IChessPieceData): c
         if (!has_piece(sameTeam, possibleMoves[i])) validMoves.push(possibleMoves[i]);
     }
 
-    //TODO: Remove all moves that would put the king in check
+    // Check if piece is pinned, and remove invalid removes
+    const pinnedPiece = get_pinned_piece_data(chessState, piece);
+    if (!pinnedPiece) return validMoves;
+    validMoves = strip_moves_outside_pin_path(validMoves, pinnedPiece);
     return validMoves;
 }

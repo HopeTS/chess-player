@@ -8,3 +8,4 @@ export * from "./queen";
 export * from "./rook";
 export * from "./bishop";
 export * from "./get";
+export * from "./strip_moves_outside_pin_path";

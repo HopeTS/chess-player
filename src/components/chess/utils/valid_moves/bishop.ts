@@ -1,5 +1,10 @@
-import { coord, IClientChessState, IChessPieceData } from "../../../../types";
+import { coord, IClientChessState, IChessPieceData, IPinnedPiece } from "../../../../types";
+import { get_black_pinned_pieces } from "../check/get_black_pinned_pieces";
+import { get_pinned_piece_data } from "../check/get_pinned_piece_data";
+import { get_white_pinned_pieces } from "../check/get_white_pinned_pieces";
+import { coords_match } from "../coords_match";
 import * as possible from "../possible_paths/possible_paths";
+import { strip_moves_outside_pin_path } from "./strip_moves_outside_pin_path";
 
 /** Get all valid moves of a bishop given the state of the chess board */
 export function bishop(chessState: IClientChessState, piece: IChessPieceData): coord[] {
@@ -31,6 +36,10 @@ export function bishop(chessState: IClientChessState, piece: IChessPieceData): c
         }
     }
 
-    //TODO: Remove all moves that would put the king in check
+    // Check if piece is pinned, and remove invalid removes
+    const pinnedPiece = get_pinned_piece_data(chessState, piece);
+    if (!pinnedPiece) return validMoves;
+    validMoves = strip_moves_outside_pin_path(validMoves, pinnedPiece);
+
     return validMoves;
 }
