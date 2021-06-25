@@ -6,3 +6,4 @@ export * from "./king";
 export * from "./knight";
 export * from "./queen";
 export * from "./rook";
+export * from "./get";

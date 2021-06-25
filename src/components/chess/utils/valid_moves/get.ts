@@ -16,7 +16,7 @@ export function get(chessState: IClientChessState, coords: coord): coord[] {
         const piece: IChessPieceData | undefined = get_piece(chessState, coords);
         if (!piece) throw new Error("Piece coordinates empty or invalid");
 
-        // TODO: Return valid moves of piece
+        // Return valid moves of piece
         switch (piece.piece) {
             case 0:
                 throw new Error("There is no piece in given coordinates");

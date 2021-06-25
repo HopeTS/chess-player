@@ -1,8 +1,10 @@
 import { coord, IChessPieceData, IClientChessState, movePath, team } from "../../../../types";
+import { get_black_threat_squares } from "../check/get_black_threat_squares";
 import { get_white_threat_squares } from "../check/get_white_threat_squares";
 import { coords_match } from "../coords_match";
 import { has_piece } from "../pieces/has_piece";
 import * as possible from "../possible_paths/possible_paths";
+import { defense } from "../utils";
 
 /** Get all valid moves of a king given the state of the chess board */
 export function king(chessState: IClientChessState, piece: IChessPieceData): coord[] {
@@ -77,12 +79,18 @@ export function king(chessState: IClientChessState, piece: IChessPieceData): coo
             }
         }
 
-        // Don't allow king to put itself in check
+        // Don't allow king to put itself in validMove path of other team piece
         const whiteThreatSquares = get_white_threat_squares(chessState);
         for (let i = 0; i < whiteThreatSquares.length; i++) {
             for (let j = 0; j < validMoves.length; j++) {
                 if (coords_match(whiteThreatSquares[i], validMoves[j])) validMoves.splice(j, 1);
             }
+        }
+
+        // Don't allow king to capture defended piece
+        const whiteDefendedCoords = defense.white(chessState);
+        for (let i = 0; i < validMoves.length; i++) {
+            if (whiteDefendedCoords[validMoves[i][0]][validMoves[i][1]] > 0) validMoves.splice(i, 1);
         }
     }
 
@@ -139,8 +147,21 @@ export function king(chessState: IClientChessState, piece: IChessPieceData): coo
                 }
             }
         }
-    }
 
-    //TODO: Remove all moves that would put the king in check
+        // Don't allow king to put itself in validMove path of other team piece
+        const blackThreatSquares = get_black_threat_squares(chessState);
+        for (let i = 0; i < blackThreatSquares.length; i++) {
+            for (let j = 0; j < validMoves.length; j++) {
+                if (coords_match(blackThreatSquares[i], validMoves[j])) validMoves.splice(j, 1);
+            }
+        }
+
+        // Don't allow king to capture defended piece
+        const blackDefendedCoords = defense.black(chessState);
+        for (let i = 0; i < validMoves.length; i++) {
+            if (blackDefendedCoords[validMoves[i][0]][validMoves[i][1]] > 0) validMoves.splice(i, 1);
+        }
+
+    }
     return validMoves;
 }
