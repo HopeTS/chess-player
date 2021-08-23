@@ -2,7 +2,7 @@ import { IServerChessState, IClientChessState, move, movePath, coord } from "../
 
 /** POST chess/move endpoint and convert to client data */
 export function make_move(move: move): Promise<IClientChessState | false> {
-    return fetch(`${process.env.REACT_APP_FLASK_SERVER}/chess/make_move`, {
+    return fetch(`${process.env.REACT_APP_FLASK_SERVER}/api/chess/make_move`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

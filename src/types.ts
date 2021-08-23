@@ -115,9 +115,25 @@ export interface ISelectedPiece {
 
 /** Pinned piece data */
 export interface IPinnedPiece {
+
+    /** Piece that is pinned */
     pinnedPiece: IChessPieceData;
+
+    /** Piece that is pinning the pinned piece */
     pinningPiece: IChessPieceData;
+
+    /** Coordinate path between pinning piece and the king */
     pathToKing: movePath;
+}
+
+/** Checked piece data */
+export interface ICheckedPiece {
+
+    /** Piece putting the opposing king in check */
+    checkedPiece: IChessPieceData;
+
+    /** The path from checked piece to and one step through the opposing king */
+    pathThroughKing: movePath;
 }
 
 /** Chess Board component */

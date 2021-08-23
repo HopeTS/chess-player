@@ -1,4 +1,5 @@
 import { IClientChessState, coord } from "../../../../types";
+import { coords_match } from "../coords_match";
 import { get_black_threat_squares } from "./get_black_threat_squares";
 
 /** Check if white king is in check */
@@ -16,7 +17,7 @@ export function get_white_check_status(chessState: IClientChessState): boolean {
 
     // Check for white king coordinates in white valid moves
     for (let i = 0; i < blackValidMoves.length; i++) {
-        if (blackValidMoves[i][0] === kingCoords[0] && blackValidMoves[i][1] === kingCoords[1]) return true;
+        if (coords_match(blackValidMoves[i], kingCoords)) return true;
     }
 
     return false;
